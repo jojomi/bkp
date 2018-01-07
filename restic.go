@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	script "github.com/jojomi/go-script"
 )
 
@@ -18,7 +16,5 @@ func executeResticCommand(sc *script.Context, command string, args ...string) (*
 		fullArgs = append(fullArgs, a)
 	}
 
-	fmt.Println("Executing", fullArgs)
-	return nil, nil
-	// return sc.ExecuteDebug(fullArgs[0], fullArgs[1:]...)
+	return sc.ExecuteDebug(fullArgs[0], fullArgs[1:]...)
 }
