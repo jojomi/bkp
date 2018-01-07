@@ -2,6 +2,7 @@
 bkp
 .bkp
 vendor.orig
+release.sh
 
 
 # Binaries for programs and plugins
