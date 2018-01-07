@@ -8,7 +8,7 @@ release:
 builds:
 - goos:
   - linux
-  - windows
+  # - windows # jojomi/go-script needs to be fix for windows
   - darwin
   - freebsd
   - netbsd
