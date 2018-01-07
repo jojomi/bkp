@@ -12,7 +12,7 @@ func SourceDirs() []string {
 	homePath, _ := homedir.Expand(fmt.Sprintf("~/.%s", buildName))
 	workPath, _ := filepath.Abs(fmt.Sprintf(".%s", buildName))
 	return []string{
-		fmt.Sprintf("/etc/.%s", buildName),
+		fmt.Sprintf("/etc/%s", buildName),
 		homePath,
 		workPath,
 	}
