@@ -35,11 +35,11 @@ func (j *Job) Execute() error {
 		context.SetEnv("RESTIC_PASSWORD", j.Target.Password)
 	}
 	context.SetEnv("RESTIC_REPOSITORY", j.Target.Path)
-	fmt.Println(j.Target, j.Target.Path, j.Target.Password)
 
 	context.PrintlnBold(fmt.Sprintf("Backup %s...", j.Name))
 	// TODO append args
-	executeResticCommand(context, "backup", j.Source)
+	args := mergeStringSlices([]string{j.Source}, j.Args)
+	executeResticCommand(context, "backup", args...)
 
 	/*if flagCheck {
 		context.PrintlnBold("Konsistenz prüfen...")
@@ -53,6 +53,7 @@ func (j *Job) Execute() error {
 	context.PrintlnBold("Alte Snapshots nach Policy löschen...")
 	executeResticCommand(context, "forget", "--keep-daily", "14", "--keep-weekly", "10", "--keep-monthly", "24", "--keep-yearly", "50")*/
 
+	fmt.Println()
 	context.PrintlnBold("Aktuelle Snapshots")
 	executeResticCommand(context, "snapshots")
 
