@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jojomi/bkp"
 	"github.com/spf13/cobra"
 )
 
 func cmdRoot(cmd *cobra.Command, args []string) {
-	jobs := AllJobs()
+	jobs := bkp.AllJobs(SourceDirs())
 
 	var (
 		err  error
@@ -23,12 +24,14 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 			continue
 		}
 
-		fmt.Println("Executing Job", job)
-		err = job.Execute()
+		err = job.Execute(bkp.JobExecuteOptions{
+			DryRun: flagDryRun,
+		})
 		if err != nil {
 			fmt.Println("Backup error", err)
 			good = false
 		}
+		fmt.Println()
 	}
 
 	if !good {

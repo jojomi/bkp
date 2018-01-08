@@ -1,4 +1,4 @@
-package main
+package bkp
 
 import (
 	"fmt"
@@ -29,17 +29,16 @@ func (j *Job) IsRelevant() bool {
 	return true
 }
 
-func (j *Job) Execute() error {
-	context := script.NewContext()
-	if j.Target.Password != "" {
-		context.SetEnv("RESTIC_PASSWORD", j.Target.Password)
-	}
-	context.SetEnv("RESTIC_REPOSITORY", j.Target.Path)
+func (j *Job) Execute(opts JobExecuteOptions) error {
 
+	ex := NewResticExecutor()
+	ex.SetTarget(j.Target)
+	ex.DryRun = opts.DryRun
+
+	context := script.NewContext()
 	context.PrintlnBold(fmt.Sprintf("Backup %s...", j.Name))
-	// TODO append args
 	args := mergeStringSlices([]string{j.Source}, j.Args)
-	executeResticCommand(context, "backup", args...)
+	ex.Command("backup", args...)
 
 	/*if flagCheck {
 		context.PrintlnBold("Konsistenz prüfen...")
@@ -51,7 +50,7 @@ func (j *Job) Execute() error {
 	}
 
 	context.PrintlnBold("Alte Snapshots nach Policy löschen...")
-	executeResticCommand(context, "forget", "--keep-daily", "14", "--keep-weekly", "10", "--keep-monthly", "24", "--keep-yearly", "50")*/
+	executeResticCommand(context, "forget", "--keep-daily", "14", "--keep-weekly", "10", "--keep-monthly", "24", "--keep-yearly", "50")
 
 	fmt.Println()
 	context.PrintlnBold("Aktuelle Snapshots")
@@ -59,11 +58,15 @@ func (j *Job) Execute() error {
 
 	fmt.Println()
 	context.PrintlnBold("Speicherverbrauch")
-	context.ExecuteDebug("du", "-sh", j.Target.Path)
+	context.ExecuteDebug("du", "-sh", j.Target.Path)*/
 
 	return nil
 }
 
 func (j *Job) String() string {
 	return fmt.Sprintf("%s (file: %s)", j.Name, j.Filename)
+}
+
+type JobExecuteOptions struct {
+	DryRun bool
 }

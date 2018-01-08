@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"os"
+
+	"github.com/jojomi/bkp"
 	script "github.com/jojomi/go-script"
 	"github.com/spf13/cobra"
 )
@@ -14,6 +18,15 @@ var (
 )
 
 func main() {
+	if forceRoot() {
+		os.Exit(0)
+	}
+
+	err := bkp.CheckEnvironment()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	rootCmd := &cobra.Command{
 		Use: buildName,
 		Run: cmdRoot,

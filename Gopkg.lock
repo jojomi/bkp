@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
@@ -124,6 +130,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a8e0ee5a16a4e8ccfc4ae361d0619eab2886ff2898b62815445cea1f9275e565"
+  inputs-digest = "f11f798ec57342bd30f0485d48d4a83730a3b6fa0819f788e3ce7e8e688e6255"
   solver-name = "gps-cdcl"
   solver-version = 1

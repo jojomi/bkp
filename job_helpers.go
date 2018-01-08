@@ -1,4 +1,4 @@
-package main
+package bkp
 
 import (
 	"encoding/json"
@@ -11,12 +11,10 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-func AllJobs() []*Job {
-	sourceDirs := SourceDirs()
-
+func AllJobs(sourceDirs []string) []*Job {
 	jobs := make([]*Job, 0)
 	for _, sourceDir := range sourceDirs {
-		for _, job := range ScanJobDir(filepath.Join(sourceDir, "jobs")) {
+		for _, job := range ScanJobDir(filepath.Join(sourceDir, "jobs"), sourceDirs) {
 			jobs = append(jobs, job)
 		}
 	}
@@ -24,7 +22,7 @@ func AllJobs() []*Job {
 	return jobs
 }
 
-func ScanJobDir(path string) []*Job {
+func ScanJobDir(path string, targetDirs []string) []*Job {
 	jobs := make([]*Job, 0)
 	var errParse error
 
@@ -32,9 +30,9 @@ func ScanJobDir(path string) []*Job {
 		var job *Job
 		switch {
 		case strings.HasSuffix(path, ".yml"):
-			job, errParse = ParseJobFromYmlFile(path)
+			job, errParse = ParseJobFromYmlFile(path, targetDirs)
 		case strings.HasSuffix(path, ".json"):
-			job, errParse = ParseJobFromJSONFile(path)
+			job, errParse = ParseJobFromJSONFile(path, targetDirs)
 		default:
 			return nil
 		}
@@ -47,7 +45,7 @@ func ScanJobDir(path string) []*Job {
 	return jobs
 }
 
-func ParseJobFromJSONFile(filename string) (*Job, error) {
+func ParseJobFromJSONFile(filename string, targetDirs []string) (*Job, error) {
 	var job Job
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -58,12 +56,12 @@ func ParseJobFromJSONFile(filename string) (*Job, error) {
 		return nil, err
 	}
 
-	augmentJob(&job, filename)
+	augmentJob(&job, filename, targetDirs)
 
 	return &job, nil
 }
 
-func ParseJobFromYmlFile(filename string) (*Job, error) {
+func ParseJobFromYmlFile(filename string, targetDirs []string) (*Job, error) {
 	var job Job
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -75,12 +73,12 @@ func ParseJobFromYmlFile(filename string) (*Job, error) {
 		return nil, err
 	}
 
-	augmentJob(&job, filename)
+	augmentJob(&job, filename, targetDirs)
 
 	return &job, nil
 }
 
-func augmentJob(job *Job, filename string) {
+func augmentJob(job *Job, filename string, targetDirs []string) {
 	job.Filename = filename
-	job.Target = TargetByName(job.TargetName)
+	job.Target = TargetByName(job.TargetName, targetDirs)
 }

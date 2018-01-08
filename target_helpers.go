@@ -1,4 +1,4 @@
-package main
+package bkp
 
 import (
 	"encoding/json"
@@ -13,9 +13,9 @@ import (
 
 var targets map[string]*Target
 
-func TargetByName(name string) *Target {
+func TargetByName(name string, sourceDirs []string) *Target {
 	if targets == nil {
-		targets = AllTargets()
+		targets = AllTargets(sourceDirs)
 	}
 
 	if t, ok := targets[name]; ok {
@@ -24,9 +24,7 @@ func TargetByName(name string) *Target {
 	return nil
 }
 
-func AllTargets() map[string]*Target {
-	sourceDirs := SourceDirs()
-
+func AllTargets(sourceDirs []string) map[string]*Target {
 	targets := make(map[string]*Target)
 	for _, sourceDir := range sourceDirs {
 		for _, target := range ScanTargetDir(filepath.Join(sourceDir, "targets")) {
