@@ -22,7 +22,7 @@ builds:
   goarm:
   - "6"
   - "7"
-  main: ui/main.go
+  main: ./ui
   ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
   binary: bkp
   env:
