@@ -10,19 +10,19 @@ builds:
   - linux
   # - windows # jojomi/go-script needs to be fix for windows
   - darwin
-  - freebsd
-  - netbsd
-  - openbsd
-  - dragonfly
+  #- freebsd
+  #- netbsd
+  #- openbsd
+  #- dragonfly
   goarch:
   - amd64
-  - "386"
-  - arm
-  - arm64
+  #- "386"
+  #- arm
+  #- arm64
   goarm:
   - "6"
   - "7"
-  main: ./ui
+  main: ./cmd/bkp
   ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
   binary: bkp
   env:
