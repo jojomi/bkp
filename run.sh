@@ -1,7 +1,8 @@
 #!/bin/sh
 
 set -e
-cd ui
+cd cmd/bkp
+go install
 go build
 ./bkp "$@"
-cd -
+cd - &> /dev/null
