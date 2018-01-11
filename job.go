@@ -64,7 +64,7 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 }
 
 func (j *Job) String() string {
-	return fmt.Sprintf("%s (file: %s)", j.Name, j.Filename)
+	return fmt.Sprintf("\"%s\" to \"%s\" (defined in %s)", j.Name, j.TargetName, j.Filename)
 }
 
 type JobExecuteOptions struct {
