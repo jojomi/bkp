@@ -1,4 +1,5 @@
 # custom
+cmd/bkp/bkp
 .bkp
 vendor.orig
 release.sh
