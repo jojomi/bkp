@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	flagJobsRelevant bool
+)
+
 func getJobsCmd() *cobra.Command {
 	jobsCmd := &cobra.Command{
 		Use:   "jobs",

@@ -5,14 +5,6 @@ import (
 	"os"
 
 	"github.com/jojomi/bkp"
-	script "github.com/jojomi/go-script"
-)
-
-var (
-	context         = script.NewContext()
-	backupTargetDir = ""
-
-	flagJobsRelevant bool
 )
 
 func main() {
