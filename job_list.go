@@ -1,5 +1,10 @@
 package bkp
 
+import (
+	"sort"
+	"strings"
+)
+
 type JobList struct {
 	Jobs []*Job
 }
@@ -24,5 +29,16 @@ func (j *JobList) Relevant() []*Job {
 }
 
 func (j *JobList) All() []*Job {
+	// sort
+	sort.Slice(j.Jobs, func(i, k int) bool {
+		var (
+			a = j.Jobs[i]
+			b = j.Jobs[k]
+		)
+		if a.Weight == b.Weight {
+			return strings.Compare(a.Name, b.Name) == -1
+		}
+		return a.Weight < b.Weight
+	})
 	return j.Jobs
 }

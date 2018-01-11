@@ -10,6 +10,7 @@ import (
 type Job struct {
 	Name       string `json:"name"`
 	Filename   string
+	Weight     int      `json:"weight"` // lower values mean the job will be executed earlier
 	Hostname   string   `json:"hostname"`
 	IP         string   `json:"ip"`
 	Source     string   `json:"source"`

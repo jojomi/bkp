@@ -54,10 +54,6 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	for i, selection := range selections {
 		selectedJobs[i] = selectionMap[selection]
 	}
-	// sort jobs
-	selectedJobList := &bkp.JobList{}
-	selectedJobList.Jobs = selectedJobs
-	selectedJobs = selectedJobList.All()
 
 	for _, job := range selectedJobs {
 		err = job.Execute(bkp.JobExecuteOptions{
