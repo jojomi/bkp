@@ -12,7 +12,6 @@ var (
 	context         = script.NewContext()
 	backupTargetDir = ""
 
-	flagDryRun       bool
 	flagJobsRelevant bool
 )
 
