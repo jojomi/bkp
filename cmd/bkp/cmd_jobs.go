@@ -8,6 +8,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func getJobsCmd() *cobra.Command {
+	jobsCmd := &cobra.Command{
+		Use:   "jobs",
+		Short: "Lists all backup jobs available",
+		Run:   cmdJobs,
+	}
+	jobsCmd.PersistentFlags().BoolVarP(&flagJobsRelevant, "relevant", "r", false, "only show relevant jobs for the current environment")
+	return jobsCmd
+}
+
 func cmdJobs(cmd *cobra.Command, args []string) {
 	sourceDirs := SourceDirs()
 	jl := bkp.JobList{}

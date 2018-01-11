@@ -8,6 +8,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func makeRootCmd() *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use: buildName,
+		Run: cmdRoot,
+	}
+	rootCmd.PersistentFlags().BoolVarP(&flagDryRun, "dry-run", "d", false, "dry run only")
+	return rootCmd
+}
+
 func cmdRoot(cmd *cobra.Command, args []string) {
 	sourceDirs := SourceDirs()
 	jl := bkp.JobList{}
