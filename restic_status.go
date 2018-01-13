@@ -6,7 +6,8 @@ import (
 )
 
 func ResticIsInstalled() bool {
-	return true
+	sc := script.NewContext()
+	return sc.CommandExists("restic")
 }
 
 func ResticVersion() (semver.Version, error) {

@@ -7,9 +7,7 @@ import (
 func CheckEnvironment() error {
 	// restic?
 	if !ResticIsInstalled() {
-		return errors.New("restic not installed. Please make sure it it ")
+		return errors.New("restic not installed. Please make sure it is in your PATH.")
 	}
-	// warn about nice (Linux, MacOS X) and ionice (Linux)
-
 	return nil
 }
