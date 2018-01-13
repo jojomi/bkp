@@ -1,22 +1,29 @@
 package bkp
 
 import (
+	"regexp"
+
 	"github.com/blang/semver"
 	script "github.com/jojomi/go-script"
 )
 
-func ResticIsInstalled() bool {
+func ResticPath() string {
 	sc := script.NewContext()
-	return sc.CommandExists("restic")
+	return sc.CommandPath("restic")
+}
+
+func ResticIsInstalled() bool {
+	return ResticPath() != ""
 }
 
 func ResticVersion() (semver.Version, error) {
 	sc := script.NewContext()
 	pr, err := sc.ExecuteFullySilent("restic", "version")
-	_ = pr
+	rex := regexp.MustCompile(`[0-9+](\.[0-9+])?(\.[0-9+])`)
+	versionString := rex.FindString(pr.Output())
 	if err != nil {
 		v, _ := semver.Make("0.0.0")
 		return v, err
 	}
-	return semver.Make("0.0.1")
+	return semver.Make(versionString)
 }

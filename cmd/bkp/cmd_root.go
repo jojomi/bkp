@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/jojomi/bkp"
 	script "github.com/jojomi/go-script"
@@ -26,12 +27,29 @@ func makeRootCmd() *cobra.Command {
 }
 
 func cmdRoot(cmd *cobra.Command, args []string) {
+	err := bkp.CheckEnvironment(minResticVersion)
+	if err != nil {
+		sugar.Fatal(err)
+	}
+
+	// warn about nice (Linux, MacOS X) and ionice (Linux)
+	sc := script.NewContext()
+	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+		if !sc.CommandExists("nice") {
+			sugar.Warn("\"nice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
+		}
+	}
+	if runtime.GOOS == "linux" {
+		if !sc.CommandExists("ionice") {
+			sugar.Warn("\"ionice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
+		}
+	}
+
 	sourceDirs := SourceDirs()
 	jl := bkp.JobList{}
 	jl.Load(sourceDirs)
 
 	var (
-		err  error
 		good = true
 	)
 
