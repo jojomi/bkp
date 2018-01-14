@@ -3,11 +3,12 @@ package bkp
 import "fmt"
 
 type Target struct {
-	Name     string `json:"name"`
-	Filename string
-	Type     string `json:"type"`
-	Path     string `json:"path"`
-	Password string `json:"password"`
+	Name       string `json:"name"`
+	Filename   string
+	Type       string `json:"type"`
+	Path       string `json:"path"`
+	Password   string `json:"password"`
+	RestoreDir string `json:"restore_dir"`
 }
 
 func (t *Target) IsReady() bool {
