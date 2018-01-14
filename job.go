@@ -31,13 +31,13 @@ func (j *Job) IsRelevant() bool {
 }
 
 func (j *Job) Execute(opts JobExecuteOptions) error {
+	context := script.NewContext()
+	context.PrintlnBold(fmt.Sprintf("Backup %s...", j.Name))
 
 	ex := NewResticExecutor()
 	ex.SetTarget(j.Target)
 	ex.DryRun = opts.DryRun
 
-	context := script.NewContext()
-	context.PrintlnBold(fmt.Sprintf("Backup %s...", j.Name))
 	args := mergeStringSlices([]string{j.Source}, j.Args)
 	ex.Command("backup", args...)
 

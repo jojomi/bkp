@@ -4,12 +4,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	script "github.com/jojomi/go-script"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
 func SourceDirs() []string {
+	if flagRootConfigDirs != "" {
+		paths := strings.Split(flagRootConfigDirs, ",")
+		result := make([]string, len(paths))
+		for i, path := range paths {
+			result[i] = strings.TrimSpace(path)
+		}
+		return result
+	}
+
+	// default values
 	homePath, _ := homedir.Expand(fmt.Sprintf("~/.%s", buildName))
 	workPath, _ := filepath.Abs(fmt.Sprintf(".%s", buildName))
 	return []string{

@@ -1,8 +1,5 @@
 #!/bin/sh
 
-set -e
-cd cmd/bkp
-go install
-go build
+./build.sh
 ./bkp "$@"
 cd - &> /dev/null

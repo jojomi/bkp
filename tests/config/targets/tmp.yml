@@ -1,0 +1,6 @@
+name: tmp
+
+password: mysupersecretpassword
+
+type: local
+path: /tmp/bkp-backup/
