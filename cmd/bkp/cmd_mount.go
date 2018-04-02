@@ -1,7 +1,11 @@
 package main
 
 import (
+	"os"
+
 	"github.com/jojomi/bkp"
+	"github.com/jojomi/go-script"
+	"github.com/jojomi/go-script/print"
 	"github.com/spf13/cobra"
 )
 
@@ -22,9 +26,16 @@ func cmdMount(cmd *cobra.Command, args []string) {
 
 	targetName := args[0]
 	target := bkp.TargetByName(targetName, SourceDirs())
+
+	sc := script.NewContext()
+
 	re := bkp.NewResticExecutor()
 	re.SetTarget(target)
-	/// re.DryRun = true
-	// TODO create restore dir if it does not exist
+	err := sc.EnsureDirExists(target.RestoreDir, os.FileMode(int(0750)))
+	if err != nil {
+		sugar.Fatal(err)
+	}
+	print.Boldf("Mounting at %s\n", target.RestoreDir)
+	sc.ExecuteSilent("xdg-open", target.RestoreDir)
 	re.Command("mount", target.RestoreDir)
 }
