@@ -25,7 +25,7 @@ func main() {
 
 	// start handling commandline
 	rootCmd := makeRootCmd()
-	rootCmd.AddCommand(getEnvCmd(), getJobsCmd(), getMountCmd())
+	rootCmd.AddCommand(getEnvCmd(), getJobsCmd(), getSnapshotsCmd(), getMountCmd())
 	rootCmd.Execute()
 }
 
