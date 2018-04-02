@@ -4,6 +4,6 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd $DIR/cmd/bkp
+pushd $DIR/cmd/bkp > /dev/null
 go install
-go build
+popd > /dev/null

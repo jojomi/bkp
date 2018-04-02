@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jojomi/bkp"
-	script "github.com/jojomi/go-script"
+	"github.com/jojomi/go-script/interview"
+	"github.com/jojomi/go-script/print"
 	"github.com/spf13/cobra"
 )
 
@@ -18,26 +20,36 @@ func getEnvCmd() *cobra.Command {
 }
 
 func cmdEnv(cmd *cobra.Command, args []string) {
-	sc := script.NewContext()
-
-	sc.PrintlnBold("# restic")
-	sc.PrintBold("restic ")
+	print.Boldln("# restic")
+	fmt.Print("restic ")
 	if bkp.ResticIsInstalled() {
-		sc.PrintSuccess("installed")
+		print.Success("installed")
 		fmt.Printf(" in %s\n", bkp.ResticPath())
 
-		sc.PrintBold("restic version ")
+		print.Bold("restic version ")
 		v, err := bkp.ResticVersion()
 		if err != nil {
 			fmt.Printf(" unknown\n")
 		} else {
 			if v.GE(minResticVersion) {
-				sc.PrintfSuccess("%s\n", v)
+				print.Successf("%s\n", v)
 			} else {
-				sc.PrintfError("%s\n", v)
+				print.Errorf("%s\n", v)
 			}
 		}
 	} else {
-		sc.PrintError("not installed!")
+		print.Errorln("not installed!")
+
+		doInstall, err := interview.Confirm("Install restic?", true)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if doInstall {
+			err := bkp.ResticUpdate()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("installed to %s.\n", bkp.ResticPath())
+		}
 	}
 }

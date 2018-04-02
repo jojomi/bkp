@@ -1,5 +1,5 @@
 #!/bin/sh
+set -e
 
 ./build.sh
-./bkp "$@"
-cd - &> /dev/null
+bkp "$@"
