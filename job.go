@@ -39,6 +39,7 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 	ex.DryRun = opts.DryRun
 
 	args := mergeStringSlices([]string{j.Source}, j.Args)
+	args = append(args, "--cleanup-cache")
 	ex.Command("backup", args...)
 
 	/*if flagCheck {
