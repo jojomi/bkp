@@ -9,6 +9,7 @@ import (
 
 	"github.com/jojomi/bkp"
 	script "github.com/jojomi/go-script"
+	"github.com/jojomi/go-script/print"
 	"github.com/spf13/cobra"
 )
 
@@ -60,6 +61,11 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 
 	ctx := script.NewContext()
 	relevantJobs := jl.Relevant()
+
+	if len(relevantJobs) == 0 {
+		print.Errorln("No relevant jobs found. Did you connect the backup targets?")
+		os.Exit(3)
+	}
 
 	var (
 		selections   []string
