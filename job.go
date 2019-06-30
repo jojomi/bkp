@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	script "github.com/jojomi/go-script"
+	"github.com/jojomi/go-script/print"
 )
 
 type Job struct {
@@ -31,8 +31,7 @@ func (j *Job) IsRelevant() bool {
 }
 
 func (j *Job) Execute(opts JobExecuteOptions) error {
-	context := script.NewContext()
-	context.PrintlnBold(fmt.Sprintf("Backup %s...", j.Name))
+	print.Boldln(fmt.Sprintf("Backup %s...", j.Name))
 
 	ex := NewResticExecutor()
 	ex.SetTarget(j.Target)

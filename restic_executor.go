@@ -64,5 +64,7 @@ func (e *ResticExecutor) Command(command string, args ...string) (*script.Proces
 		fmt.Println(strings.Join(fullArgs, " "))
 		return nil, nil
 	}
-	return e.context.ExecuteDebug(fullArgs[0], fullArgs[1:]...)
+	localCommand := script.NewLocalCommand()
+	localCommand.AddAll(fullArgs...)
+	return e.context.ExecuteDebug(localCommand)
 }

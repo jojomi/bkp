@@ -18,7 +18,8 @@ func ResticIsInstalled() bool {
 
 func ResticVersion() (semver.Version, error) {
 	sc := script.NewContext()
-	pr, err := sc.ExecuteFullySilent("restic", "version")
+	lc := script.LocalCommandFrom("restic version")
+	pr, err := sc.ExecuteFullySilent(lc)
 	rex := regexp.MustCompile(`[0-9+](\.[0-9+])?(\.[0-9+])`)
 	versionString := rex.FindString(pr.Output())
 	if err != nil {

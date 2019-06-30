@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"syscall"
 )
 
@@ -26,6 +25,8 @@ type ProcessResult struct {
 
 // CommandConfig defines details of command execution.
 type CommandConfig struct {
+	RawStdout    bool
+	RawStderr    bool
 	OutputStdout bool
 	OutputStderr bool
 	ConnectStdin bool
@@ -95,14 +96,14 @@ func (pr *ProcessResult) ExitCode() (int, error) {
 	return waitStatus.ExitStatus(), nil
 }
 
-// CommandPath finds the full path of a binary given its name. This requires the wich command to be present in the system.
-func (c *Context) CommandPath(name string) string {
-	cmd := exec.Command("which", name)
-	cmdOutput, err := cmd.Output()
+// CommandPath finds the full path of a binary given its name.
+// also see https://golang.org/pkg/os/exec/#LookPath
+func (c *Context) CommandPath(name string) (path string) {
+	path, err := exec.LookPath(name)
 	if err != nil {
 		return ""
 	}
-	return strings.Trim(string(cmdOutput), "\n")
+	return
 }
 
 // CommandExists checks if a given binary exists in PATH.
@@ -117,45 +118,55 @@ func (c *Context) MustCommandExist(name string) {
 	}
 }
 
+// ExecuteRaw executes a system command without touching stdout and stderr.
+func (c *Context) ExecuteRaw(command Command) (pr *ProcessResult, err error) {
+	pr, err = c.Execute(CommandConfig{
+		RawStdout:    true,
+		RawStderr:    true,
+		ConnectStdin: true,
+	}, command)
+	return
+}
+
 // ExecuteDebug executes a system command, stdout and stderr are piped
-func (c *Context) ExecuteDebug(name string, args ...string) (pr *ProcessResult, err error) {
+func (c *Context) ExecuteDebug(command Command) (pr *ProcessResult, err error) {
 	pr, err = c.Execute(CommandConfig{
 		OutputStdout: true,
 		OutputStderr: true,
 		ConnectStdin: true,
-	}, name, args...)
+	}, command)
 	return
 }
 
 // ExecuteSilent executes a  system command without outputting stdout (it is
 // still captured and can be retrieved using the returned ProcessResult)
-func (c *Context) ExecuteSilent(name string, args ...string) (pr *ProcessResult, err error) {
+func (c *Context) ExecuteSilent(command Command) (pr *ProcessResult, err error) {
 	pr, err = c.Execute(CommandConfig{
 		OutputStdout: false,
 		OutputStderr: true,
 		ConnectStdin: true,
-	}, name, args...)
+	}, command)
 	return
 }
 
 // ExecuteFullySilent executes a system command without outputting stdout or
 // stderr (both are still captured and can be retrieved using the returned ProcessResult)
-func (c *Context) ExecuteFullySilent(name string, args ...string) (pr *ProcessResult, err error) {
+func (c *Context) ExecuteFullySilent(command Command) (pr *ProcessResult, err error) {
 	pr, err = c.Execute(CommandConfig{
 		OutputStdout: false,
 		OutputStderr: false,
 		ConnectStdin: true,
-	}, name, args...)
+	}, command)
 	return
 }
 
 // MustExecuteDebug ensures a system command to be executed, otherwise panics
-func (c *Context) MustExecuteDebug(name string, args ...string) (pr *ProcessResult) {
+func (c *Context) MustExecuteDebug(command Command) (pr *ProcessResult) {
 	pr, err := c.Execute(CommandConfig{
 		OutputStdout: true,
 		OutputStderr: true,
 		ConnectStdin: true,
-	}, name, args...)
+	}, command)
 	if err != nil {
 		panic(err)
 	}
@@ -164,12 +175,12 @@ func (c *Context) MustExecuteDebug(name string, args ...string) (pr *ProcessResu
 
 // MustExecuteSilent ensures a system command to be executed without outputting
 // stdout, otherwise panics
-func (c *Context) MustExecuteSilent(name string, args ...string) (pr *ProcessResult) {
+func (c *Context) MustExecuteSilent(command Command) (pr *ProcessResult) {
 	pr, err := c.Execute(CommandConfig{
 		OutputStdout: false,
 		OutputStderr: true,
 		ConnectStdin: true,
-	}, name, args...)
+	}, command)
 	if err != nil {
 		panic(err)
 	}
@@ -178,12 +189,12 @@ func (c *Context) MustExecuteSilent(name string, args ...string) (pr *ProcessRes
 
 // MustExecuteFullySilent ensures a system command to be executed without
 // outputting stdout and stderr, otherwise panics
-func (c *Context) MustExecuteFullySilent(name string, args ...string) (pr *ProcessResult) {
+func (c *Context) MustExecuteFullySilent(command Command) (pr *ProcessResult) {
 	pr, err := c.Execute(CommandConfig{
 		OutputStdout: false,
 		OutputStderr: false,
 		ConnectStdin: true,
-	}, name, args...)
+	}, command)
 	if err != nil {
 		panic(err)
 	}
@@ -191,8 +202,8 @@ func (c *Context) MustExecuteFullySilent(name string, args ...string) (pr *Proce
 }
 
 // Execute executes a system command according to given CommandConfig.
-func (c *Context) Execute(cc CommandConfig, name string, args ...string) (pr *ProcessResult, err error) {
-	cmd, pr := c.prepareCommand(cc, name, args...)
+func (c *Context) Execute(cc CommandConfig, command Command) (pr *ProcessResult, err error) {
+	cmd, pr := c.prepareCommand(cc, command)
 
 	if cc.Detach {
 		cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -215,57 +226,65 @@ func (c *Context) Execute(cc CommandConfig, name string, args ...string) (pr *Pr
 
 // ExecuteDetachedDebug executes a system command, stdout and stderr are piped.
 // The command is executed in the background (detached).
-func (c *Context) ExecuteDetachedDebug(name string, args ...string) (pr *ProcessResult, err error) {
+func (c *Context) ExecuteDetachedDebug(command Command) (pr *ProcessResult, err error) {
 	pr, err = c.Execute(CommandConfig{
 		OutputStdout: true,
 		OutputStderr: true,
 		Detach:       true,
-	}, name, args...)
+	}, command)
 	return
 }
 
-// ExecuteDetachedSilent executes a  system command without outputting stdout (it is
+// ExecuteDetachedSilent executes a system command without outputting stdout (it is
 // still captured and can be retrieved using the returned ProcessResult).
 // The command is executed in the background (detached).
-func (c *Context) ExecuteDetachedSilent(name string, args ...string) (pr *ProcessResult, err error) {
+func (c *Context) ExecuteDetachedSilent(command Command) (pr *ProcessResult, err error) {
 	pr, err = c.Execute(CommandConfig{
 		OutputStdout: false,
 		OutputStderr: true,
 		Detach:       true,
-	}, name, args...)
+	}, command)
 	return
 }
 
 // ExecuteDetachedFullySilent executes a system command without outputting stdout or
 // stderr (both are still captured and can be retrieved using the returned ProcessResult).
 // The command is executed in the background (detached).
-func (c *Context) ExecuteDetachedFullySilent(name string, args ...string) (pr *ProcessResult, err error) {
+func (c *Context) ExecuteDetachedFullySilent(command Command) (pr *ProcessResult, err error) {
 	pr, err = c.Execute(CommandConfig{
 		OutputStdout: false,
 		OutputStderr: false,
 		Detach:       true,
-	}, name, args...)
+	}, command)
 	return
 }
 
-func (c Context) prepareCommand(cc CommandConfig, name string, args ...string) (*exec.Cmd, *ProcessResult) {
+func (c Context) prepareCommand(cc CommandConfig, command Command) (*exec.Cmd, *ProcessResult) {
 	pr := NewProcessResult()
 
-	cmd := exec.Command(name, args...)
+	cmd := exec.Command(command.Binary(), command.Args()...)
 	pr.Cmd = cmd
 
 	cmd.Dir = c.workingDir
 	cmd.Env = c.getFullEnv()
 
-	if !cc.OutputStdout {
-		cmd.Stdout = pr.stdoutBuffer
+	if cc.RawStdout {
+		cmd.Stdout = os.Stdout
 	} else {
-		cmd.Stdout = io.MultiWriter(c.stdout, pr.stdoutBuffer)
+		if !cc.OutputStdout {
+			cmd.Stdout = pr.stdoutBuffer
+		} else {
+			cmd.Stdout = io.MultiWriter(c.stdout, pr.stdoutBuffer)
+		}
 	}
-	if !cc.OutputStderr {
-		cmd.Stderr = pr.stderrBuffer
+	if cc.RawStderr {
+		cmd.Stderr = os.Stderr
 	} else {
-		cmd.Stderr = io.MultiWriter(c.stderr, pr.stderrBuffer)
+		if !cc.OutputStderr {
+			cmd.Stderr = pr.stderrBuffer
+		} else {
+			cmd.Stderr = io.MultiWriter(c.stderr, pr.stderrBuffer)
+		}
 	}
 
 	if cc.ConnectStdin {
@@ -279,17 +298,4 @@ func (c Context) WaitCmd(pr *ProcessResult) {
 	err := pr.Cmd.Wait()
 	pr.ProcessState = pr.Cmd.ProcessState
 	pr.ProcessError = err
-}
-
-// SplitCommand helper splits a string to command and arbitrarily many args.
-// Does not handle bash specifics like ", ', and \ specially.
-func SplitCommand(input string) (command string, args []string) {
-	parts := strings.Fields(input)
-	if len(parts) == 0 {
-		args = []string{}
-		return
-	}
-	command = parts[0]
-	args = parts[1:]
-	return
 }
