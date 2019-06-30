@@ -30,7 +30,7 @@ func main() {
 }
 
 func init() {
-	minResticVersion, _ = semver.Make("0.8.1")
+	minResticVersion, _ = semver.Make("0.9.5")
 }
 
 func setupLogger() {
