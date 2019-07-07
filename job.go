@@ -3,20 +3,33 @@ package bkp
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/jojomi/go-script/print"
 )
 
 type Job struct {
-	Name       string `json:"name"`
-	Filename   string
-	Weight     int      `json:"weight"` // lower values mean the job will be executed earlier
-	Hostname   string   `json:"hostname"`
-	IP         string   `json:"ip"`
-	Source     string   `json:"source"`
-	Args       []string `json:"args"`
-	TargetName string   `json:"target"`
+	Name     string `json:"name"`
+	Filename string
+	Weight   int    `json:"weight"` // lower values mean the job will be executed earlier
+	Hostname string `json:"hostname"`
+	IP       string `json:"ip"`
+	Source   string `json:"source"`
+	CacheDir string `json:"cache-dir,omitempty"`
+	Backup   struct {
+		Args []string `json:"args"`
+	}
+	TargetName string `json:"target"`
 	Target     *Target
+	Forget     struct {
+		Keep struct {
+			Hourly  *int
+			Daily   *int
+			Weekly  *int
+			Monthly *int
+			Yearly  *int
+		}
+	}
 }
 
 func (j *Job) IsRelevant() bool {
@@ -35,11 +48,56 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 
 	ex := NewResticExecutor()
 	ex.SetTarget(j.Target)
+	ex.SetCacheDir(j.CacheDir)
 	ex.DryRun = opts.DryRun
 
-	args := mergeStringSlices([]string{j.Source}, j.Args)
-	args = append(args, "--cleanup-cache")
+	args := mergeStringSlices([]string{j.Source, "--verbose"}, j.Backup.Args)
 	ex.Command("backup", args...)
+
+	ex.Command("snapshots")
+
+	if opts.DoForget {
+		forgetArgs := []string{
+			"--verbose",
+		}
+		if j.Hostname != "" {
+			forgetArgs = append(forgetArgs, "--host", j.Hostname)
+		}
+		if j.Forget.Keep.Hourly != nil {
+			forgetArgs = append(forgetArgs, "--keep-hourly", strconv.Itoa(*j.Forget.Keep.Hourly))
+		}
+		if j.Forget.Keep.Daily != nil {
+			forgetArgs = append(forgetArgs, "--keep-daily", strconv.Itoa(*j.Forget.Keep.Daily))
+		}
+		if j.Forget.Keep.Weekly != nil {
+			forgetArgs = append(forgetArgs, "--keep-weekly", strconv.Itoa(*j.Forget.Keep.Weekly))
+		}
+		if j.Forget.Keep.Monthly != nil {
+			forgetArgs = append(forgetArgs, "--keep-monthly", strconv.Itoa(*j.Forget.Keep.Monthly))
+		}
+		if j.Forget.Keep.Yearly != nil {
+			forgetArgs = append(forgetArgs, "--keep-yearly", strconv.Itoa(*j.Forget.Keep.Yearly))
+		}
+		ex.Command("forget", forgetArgs...)
+	}
+
+	if opts.DoMaintenance {
+		print.Boldln("restic prune...")
+		ex.Command("prune")
+		fmt.Println()
+
+		print.Boldln("restic rebuild-index...")
+		ex.Command("rebuild-index")
+		fmt.Println()
+
+		print.Boldln("restic clean-cache...")
+		ex.Command("restic", "cache", "--cleanup")
+		fmt.Println()
+
+		print.Boldln("restic check...")
+		ex.Command("check")
+		fmt.Println()
+	}
 
 	/*if flagCheck {
 		context.PrintlnBold("Konsistenz prüfen...")
@@ -69,5 +127,7 @@ func (j *Job) String() string {
 }
 
 type JobExecuteOptions struct {
-	DryRun bool
+	DryRun        bool
+	DoForget      bool
+	DoMaintenance bool
 }

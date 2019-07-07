@@ -9,6 +9,7 @@ import (
 
 	"github.com/jojomi/bkp"
 	script "github.com/jojomi/go-script"
+	"github.com/jojomi/go-script/interview"
 	"github.com/jojomi/go-script/print"
 	"github.com/spf13/cobra"
 )
@@ -33,22 +34,11 @@ func makeRootCmd() *cobra.Command {
 }
 
 func cmdRoot(cmd *cobra.Command, args []string) {
-	err := bkp.CheckEnvironment(minResticVersion)
+	print.Title("Check phase")
+
+	err := check()
 	if err != nil {
 		sugar.Fatal(err)
-	}
-
-	// warn about nice (Linux, MacOS X) and ionice (Linux)
-	sc := script.NewContext()
-	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
-		if !sc.CommandExists("nice") {
-			sugar.Warn("\"nice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
-		}
-	}
-	if runtime.GOOS == "linux" {
-		if !sc.CommandExists("ionice") {
-			sugar.Warn("\"ionice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
-		}
 	}
 
 	sourceDirs := SourceDirs()
@@ -59,18 +49,20 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		good = true
 	)
 
-	ctx := script.NewContext()
 	relevantJobs := jl.Relevant()
 
 	if len(relevantJobs) == 0 {
-		print.Errorln("No relevant jobs found. Did you connect the backup targets?")
-		os.Exit(3)
+		sugar.Fatal("No relevant jobs found. Did you connect the backup targets?")
 	}
 
 	var (
 		selections   []string
 		selectedJobs []*bkp.Job
 	)
+
+	fmt.Println()
+	print.Title("Preparation phase")
+
 	if flagRootJobs == "" {
 		selectionMap := make(map[string]*bkp.Job, len(relevantJobs))
 		options := make([]string, len(relevantJobs))
@@ -81,7 +73,8 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 			options[i] = jobIdentifier
 		}
 
-		selections, err = ctx.ChooseMultiStrings("Which backups should be executed? (Spacebar to select, Return to start backup)", options)
+		print.Subtitle("Backup selection")
+		selections, err = interview.ChooseMultiStrings("Which backups should be executed? (Spacebar to select, Return to start backup)", options)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -109,9 +102,31 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	print.Subtitle("Old Backups")
+	doForget, err := interview.Confirm("Delete older backups as specified after finishing the new backup?", true)
+	if err != nil {
+		sugar.Fatal(err)
+	}
+
+	print.Subtitle("Maintenance")
+	doMaintenance, err := interview.Confirm("Do maintenance operations (takes a lot of time)?", false)
+	if err != nil {
+		sugar.Fatal(err)
+	}
+
+	print.Subtitle("Shutdown")
+	doShutdown, err := interview.Confirm("Shutdown after finishing?", false)
+	if err != nil {
+		sugar.Fatal(err)
+	}
+
+	fmt.Println()
+	print.Title("Execution phase")
 	for _, job := range selectedJobs {
 		err = job.Execute(bkp.JobExecuteOptions{
-			DryRun: flagRootDryRun,
+			DryRun:        flagRootDryRun,
+			DoForget:      doForget,
+			DoMaintenance: doMaintenance,
 		})
 		if err != nil {
 			fmt.Println("Backup error", err)
@@ -120,7 +135,38 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		fmt.Println()
 	}
 
+	if doShutdown {
+		print.Title("Shutdown")
+		if !flagRootDryRun {
+			sc := script.NewContext()
+			lc := script.NewLocalCommand()
+			lc.AddAll("shutdown", "--poweroff", "+5")
+			sc.ExecuteDebug(lc)
+		}
+	}
+
 	if !good {
 		os.Exit(1)
 	}
+}
+
+func check() error {
+	err := bkp.CheckEnvironment(minResticVersion)
+	if err != nil {
+		sugar.Fatal(err)
+	}
+
+	// warn about nice (Linux, MacOS X) and ionice (Linux)
+	sc := script.NewContext()
+	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+		if !sc.CommandExists("nice") {
+			sugar.Warn("\"nice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
+		}
+	}
+	if runtime.GOOS == "linux" {
+		if !sc.CommandExists("ionice") {
+			sugar.Warn("\"ionice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
+		}
+	}
+	return err
 }

@@ -36,6 +36,8 @@ func cmdMount(cmd *cobra.Command, args []string) {
 		sugar.Fatal(err)
 	}
 	print.Boldf("Mounting at %s\n", target.RestoreDir)
-	sc.ExecuteSilent("xdg-open", target.RestoreDir)
+	lc := script.NewLocalCommand()
+	lc.AddAll("xdg-open", target.RestoreDir)
+	sc.ExecuteSilent(lc)
 	re.Command("mount", target.RestoreDir)
 }

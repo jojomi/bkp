@@ -35,6 +35,9 @@ func forceRoot() bool {
 	if context.IsUserRoot() {
 		return false
 	}
-	context.ExecuteDebug("sudo", os.Args...)
+	lc := script.NewLocalCommand()
+	lc.Add("sudo")
+	lc.AddAll(os.Args...)
+	context.ExecuteDebug(lc)
 	return true
 }

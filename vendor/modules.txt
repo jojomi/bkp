@@ -9,7 +9,7 @@ github.com/gernest/wow/spin
 github.com/ghodss/yaml
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/jojomi/go-script v2.0.0+incompatible
+# github.com/jojomi/go-script v2.1.0+incompatible
 github.com/jojomi/go-script
 github.com/jojomi/go-script/print
 github.com/jojomi/go-script/interview
@@ -43,7 +43,7 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/buffer
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
-# golang.org/x/crypto v0.0.0-20190621222207-cc06ce4a13d4
+# golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
 golang.org/x/sys/unix

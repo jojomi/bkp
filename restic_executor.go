@@ -12,8 +12,9 @@ import (
 type ResticExecutor struct {
 	DryRun bool
 
-	context *script.Context
-	target  *Target
+	context  *script.Context
+	target   *Target
+	cacheDir string
 
 	hasNiceCommand   bool
 	hasIONiceCommand bool
@@ -27,6 +28,10 @@ func NewResticExecutor() *ResticExecutor {
 	ex.hasIONiceCommand = ex.context.CommandExists("ionice")
 
 	return &ex
+}
+
+func (e *ResticExecutor) SetCacheDir(cacheDir string) {
+	e.cacheDir = cacheDir
 }
 
 func (e *ResticExecutor) SetTarget(t *Target) {
@@ -55,6 +60,10 @@ func (e *ResticExecutor) Command(command string, args ...string) (*script.Proces
 		fullArgs = mergeStringSlices(fullArgs, []string{"ionice", "-c2", "-n7"})
 	}
 	fullArgs = mergeStringSlices(fullArgs, []string{"restic", command})
+
+	if e.cacheDir != "" {
+		fullArgs = append(fullArgs, "--cache-dir", e.cacheDir)
+	}
 
 	for _, a := range args {
 		fullArgs = append(fullArgs, a)

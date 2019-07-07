@@ -9,7 +9,7 @@ import (
 )
 
 func ResticUpdate() error {
-	var packagedRestic = "restic-release/restic_0.8.3_linux_amd64"
+	var packagedRestic = "restic-release/restic_0.9.5_linux_amd64"
 	outPath := "/usr/local/bin/restic"
 	sc := script.NewContext()
 	err := sc.CopyFile(packagedRestic, outPath)

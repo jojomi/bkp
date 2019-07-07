@@ -1,5 +1,7 @@
 #!/bin/sh
-set -e
+set -ex
 
+echo "Building..."
 ./build.sh
-bkp "$@"
+echo "Running..."
+sudo bkp "$@"
