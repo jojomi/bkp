@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	script "github.com/jojomi/go-script"
+	script "github.com/jojomi/go-script/v2"
 	homedir "github.com/mitchellh/go-homedir"
 )
 

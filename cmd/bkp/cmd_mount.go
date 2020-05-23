@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/jojomi/bkp"
-	"github.com/jojomi/go-script"
-	"github.com/jojomi/go-script/print"
+	"github.com/jojomi/go-script/v2"
+	"github.com/jojomi/go-script/v2/print"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )

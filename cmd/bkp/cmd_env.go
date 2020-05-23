@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/jojomi/bkp"
-	"github.com/jojomi/go-script/interview"
-	"github.com/jojomi/go-script/print"
+	"github.com/jojomi/go-script/v2/interview"
+	"github.com/jojomi/go-script/v2/print"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )

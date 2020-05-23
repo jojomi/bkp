@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jojomi/go-script/print"
+	"github.com/jojomi/go-script/v2/print"
 )
 
 type Job struct {

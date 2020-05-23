@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jojomi/go-script"
+	"github.com/jojomi/go-script/v2"
 )
 
 func ResticUpdate() error {

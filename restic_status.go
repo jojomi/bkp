@@ -4,7 +4,7 @@ import (
 	"regexp"
 
 	"github.com/blang/semver"
-	script "github.com/jojomi/go-script"
+	script "github.com/jojomi/go-script/v2"
 )
 
 func ResticPath() string {

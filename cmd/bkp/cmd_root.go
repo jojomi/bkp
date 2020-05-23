@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/jojomi/bkp"
-	script "github.com/jojomi/go-script"
-	"github.com/jojomi/go-script/interview"
-	"github.com/jojomi/go-script/print"
+	script "github.com/jojomi/go-script/v2"
+	"github.com/jojomi/go-script/v2/interview"
+	"github.com/jojomi/go-script/v2/print"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
