@@ -11,8 +11,8 @@ github.com/ghodss/yaml
 github.com/inconshreveable/mousetrap
 # github.com/jojomi/go-script v2.1.0+incompatible
 github.com/jojomi/go-script
-github.com/jojomi/go-script/print
 github.com/jojomi/go-script/interview
+github.com/jojomi/go-script/print
 # github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 github.com/kballard/go-shellquote
 # github.com/mattn/go-colorable v0.1.2
@@ -38,11 +38,11 @@ go.uber.org/atomic
 go.uber.org/multierr
 # go.uber.org/zap v1.10.0
 go.uber.org/zap
-go.uber.org/zap/zapcore
-go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
