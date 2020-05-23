@@ -81,7 +81,7 @@ func (e *ResticExecutor) Command(command string, args ...string) (*script.Proces
 	localCommand.AddAll(fullArgs...)
 	log.Info().
 		Str("command", localCommand.String()).
-		Strs("repository", e.context.GetCustomEnv()).
+		Strs("environment", e.context.GetCustomEnv()).
 		Msg("full command")
 
 	if e.DryRun {

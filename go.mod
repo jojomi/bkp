@@ -8,7 +8,7 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/hinshun/vt10x v0.0.0-20180809195222-d55458df857c // indirect
-	github.com/jojomi/go-script/v2 v2.2.1
+	github.com/jojomi/go-script/v2 v2.2.2
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
