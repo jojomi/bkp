@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/jojomi/go-script/v2/print"
 )
@@ -53,8 +54,16 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 
 	args := mergeStringSlices([]string{j.Source, "--verbose"}, j.Backup.Args)
 	ex.Command("backup", args...)
+	// TODO unlock if locked? ex.Command("unlock")
 
-	ex.Command("snapshots")
+	snapshotArgs := make([]string, 0)
+	if j.Hostname != "" {
+		snapshotArgs = append(snapshotArgs, "--host", j.Hostname)
+	}
+	if j.Source != "" {
+		snapshotArgs = append(snapshotArgs, "--path", strings.TrimRight(j.Source, `/`))
+	}
+	ex.Command("snapshots", snapshotArgs...)
 
 	if opts.DoForget {
 		forgetArgs := []string{
@@ -62,6 +71,9 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 		}
 		if j.Hostname != "" {
 			forgetArgs = append(forgetArgs, "--host", j.Hostname)
+		}
+		if j.Source != "" {
+			forgetArgs = append(forgetArgs, "--path", j.Source)
 		}
 		if j.Forget.Keep.Hourly != nil {
 			forgetArgs = append(forgetArgs, "--keep-hourly", strconv.Itoa(*j.Forget.Keep.Hourly))
