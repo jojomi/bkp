@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jojomi/bkp"
 	"github.com/jojomi/go-script/interview"
 	"github.com/jojomi/go-script/print"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -42,12 +42,12 @@ func cmdEnv(cmd *cobra.Command, args []string) {
 
 		doInstall, err := interview.Confirm("Install restic?", true)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err).Msg("")
 		}
 		if doInstall {
 			err := bkp.ResticUpdate()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err).Msg("")
 			}
 			fmt.Printf("installed to %s.\n", bkp.ResticPath())
 		}

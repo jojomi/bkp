@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	script "github.com/jojomi/go-script"
 	"github.com/jojomi/go-script/interview"
 	"github.com/jojomi/go-script/print"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 
 	err := check()
 	if err != nil {
-		sugar.Fatal(err)
+		log.Fatal().Err(err).Msg("System check failed.")
 	}
 
 	sourceDirs := SourceDirs()
@@ -52,7 +52,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	relevantJobs := jl.Relevant()
 
 	if len(relevantJobs) == 0 {
-		sugar.Fatal("No relevant jobs found. Did you connect the backup targets?")
+		log.Fatal().Msg("No relevant jobs found. Did you connect the backup targets?")
 	}
 
 	var (
@@ -76,7 +76,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		print.Subtitle("Backup selection")
 		selections, err = interview.ChooseMultiStrings("Which backups should be executed? (Spacebar to select, Return to start backup)", options)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err).Msg("No valid job selection")
 		}
 		selectedJobs = make([]*bkp.Job, len(selections))
 		for i, selection := range selections {
@@ -105,19 +105,19 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	print.Subtitle("Old Backups")
 	doForget, err := interview.Confirm("Delete older backups as specified after finishing the new backup?", true)
 	if err != nil {
-		sugar.Fatal(err)
+		log.Fatal().Err(err).Msg("No valid answer.")
 	}
 
 	print.Subtitle("Maintenance")
 	doMaintenance, err := interview.Confirm("Do maintenance operations (takes a lot of time)?", false)
 	if err != nil {
-		sugar.Fatal(err)
+		log.Fatal().Err(err).Msg("No valid answer.")
 	}
 
 	print.Subtitle("Shutdown")
 	doShutdown, err := interview.Confirm("Shutdown after finishing?", false)
 	if err != nil {
-		sugar.Fatal(err)
+		log.Fatal().Err(err).Msg("No valid answer.")
 	}
 
 	fmt.Println()
@@ -153,19 +153,19 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 func check() error {
 	err := bkp.CheckEnvironment(minResticVersion)
 	if err != nil {
-		sugar.Fatal(err)
+		log.Fatal().Err(err).Msg("Environment check failed.")
 	}
 
 	// warn about nice (Linux, MacOS X) and ionice (Linux)
 	sc := script.NewContext()
 	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
 		if !sc.CommandExists("nice") {
-			sugar.Warn("\"nice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
+			log.Warn().Msg("\"nice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
 		}
 	}
 	if runtime.GOOS == "linux" {
 		if !sc.CommandExists("ionice") {
-			sugar.Warn("\"ionice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
+			log.Warn().Msg("\"ionice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
 		}
 	}
 	return err

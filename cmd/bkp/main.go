@@ -2,26 +2,23 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/blang/semver"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var (
-	logger *zap.Logger
-	sugar  *zap.SugaredLogger
-
 	minResticVersion semver.Version
 )
 
 func main() {
-	setupLogger()
-	defer logger.Sync()
-
 	if forceRoot() {
 		os.Exit(0)
 	}
+
+	log.Logger = log.With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 
 	// start handling commandline
 	rootCmd := makeRootCmd()
@@ -31,33 +28,4 @@ func main() {
 
 func init() {
 	minResticVersion, _ = semver.Make("0.9.5")
-}
-
-func setupLogger() {
-	encoderCfg := zapcore.EncoderConfig{
-		// Keys can be anything except the empty string.
-		TimeKey:        "T",
-		LevelKey:       "L",
-		NameKey:        "N",
-		CallerKey:      "C",
-		MessageKey:     "M",
-		StacktraceKey:  "S",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.CapitalLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.StringDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-	config := zap.Config{
-		Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Development:       false,
-		DisableStacktrace: true,
-		DisableCaller:     true,
-		Encoding:          "console",
-		EncoderConfig:     encoderCfg,
-		OutputPaths:       []string{"stderr"},
-		ErrorOutputPaths:  []string{"stderr"},
-	}
-	logger, _ = config.Build()
-	sugar = logger.Sugar()
 }

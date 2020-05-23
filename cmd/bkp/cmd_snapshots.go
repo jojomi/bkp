@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jojomi/bkp"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +18,7 @@ func getSnapshotsCmd() *cobra.Command {
 func cmdSnapshots(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
 		// TODO add selection dialog instead
-		sugar.Fatal("No target given")
+		log.Fatal().Msg("No target given")
 	}
 
 	targetName := args[0]

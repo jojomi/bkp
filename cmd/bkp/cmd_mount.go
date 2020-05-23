@@ -6,6 +6,7 @@ import (
 	"github.com/jojomi/bkp"
 	"github.com/jojomi/go-script"
 	"github.com/jojomi/go-script/print"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ func getMountCmd() *cobra.Command {
 func cmdMount(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
 		// TODO add selection dialog instead
-		sugar.Fatal("No target given")
+		log.Fatal().Msg("No target given")
 	}
 
 	targetName := args[0]
@@ -33,7 +34,7 @@ func cmdMount(cmd *cobra.Command, args []string) {
 	re.SetTarget(target)
 	err := sc.EnsureDirExists(target.RestoreDir, os.FileMode(int(0750)))
 	if err != nil {
-		sugar.Fatal(err)
+		log.Fatal().Err(err).Msg("")
 	}
 	print.Boldf("Mounting at %s\n", target.RestoreDir)
 	lc := script.NewLocalCommand()
