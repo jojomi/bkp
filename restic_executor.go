@@ -88,5 +88,9 @@ func (e *ResticExecutor) Command(command string, args ...string) (*script.Proces
 		fmt.Println(strings.Join(fullArgs, " "))
 		return nil, nil
 	}
-	return e.context.ExecuteDebug(localCommand)
+	return e.context.Execute(script.CommandConfig{
+		RawStdout:    true,
+		RawStderr:    true,
+		ConnectStdin: false,
+	}, localCommand)
 }
