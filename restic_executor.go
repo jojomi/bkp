@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	script "github.com/jojomi/go-script"
+	"github.com/rs/zerolog/log"
 )
 
 type ResticExecutor struct {
@@ -54,26 +55,38 @@ func (e *ResticExecutor) Command(command string, args ...string) (*script.Proces
 		default:
 			niceValue = 19
 		}
-		fullArgs = []string{"nice", "-n", strconv.Itoa(niceValue)}
+		niceArgs := []string{"nice", "-n", strconv.Itoa(niceValue)}
+		log.Debug().Strs("args", niceArgs).Msg("nice is available, using it")
+		fullArgs = append(fullArgs, niceArgs...)
 	}
 	if e.context.CommandExists("ionice") {
-		fullArgs = mergeStringSlices(fullArgs, []string{"ionice", "-c2", "-n7"})
+		ioniceArgs := []string{"ionice", "-c2", "-n7"}
+		log.Debug().Strs("args", ioniceArgs).Msg("ionice is available, using it")
+		fullArgs = append(fullArgs, ioniceArgs...)
 	}
-	fullArgs = mergeStringSlices(fullArgs, []string{"restic", command})
+	resticBaseArgs := []string{"restic", command}
+	log.Debug().Strs("args", resticBaseArgs).Msg("building basic restic command")
+	fullArgs = append(fullArgs, resticBaseArgs...)
 
 	if e.cacheDir != "" {
-		fullArgs = append(fullArgs, "--cache-dir", e.cacheDir)
+		cacheArgs := []string{"--cache-dir", e.cacheDir}
+		log.Debug().Strs("args", cacheArgs).Msg("adding cache args")
+		fullArgs = append(fullArgs, cacheArgs...)
 	}
 
-	for _, a := range args {
-		fullArgs = append(fullArgs, a)
-	}
+	log.Debug().Strs("args", args).Msg("adding restic command args")
+	fullArgs = append(fullArgs, args...)
+
+	localCommand := script.NewLocalCommand()
+	localCommand.AddAll(fullArgs...)
+	log.Info().
+		Str("command", localCommand.String()).
+		Strs("repository", e.context.GetCustomEnv()).
+		Msg("full command")
 
 	if e.DryRun {
 		fmt.Println(strings.Join(fullArgs, " "))
 		return nil, nil
 	}
-	localCommand := script.NewLocalCommand()
-	localCommand.AddAll(fullArgs...)
 	return e.context.ExecuteDebug(localCommand)
 }

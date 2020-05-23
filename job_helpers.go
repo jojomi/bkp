@@ -9,12 +9,15 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog/log"
 )
 
 func AllJobs(sourceDirs []string) []*Job {
 	jobs := make([]*Job, 0)
 	for _, sourceDir := range sourceDirs {
+		log.Info().Str("sourceDir", sourceDir).Msg("Searching jobs")
 		for _, job := range ScanJobDir(filepath.Join(sourceDir, "jobs"), sourceDirs) {
+			log.Debug().Str("job", job.String()).Msg("Job found")
 			jobs = append(jobs, job)
 		}
 	}

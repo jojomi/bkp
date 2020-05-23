@@ -10,11 +10,13 @@ import (
 	script "github.com/jojomi/go-script"
 	"github.com/jojomi/go-script/interview"
 	"github.com/jojomi/go-script/print"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 var (
+	flagRootVerbose    bool
 	flagRootDryRun     bool
 	flagRootAllJobs    bool
 	flagRootJobs       string
@@ -26,14 +28,24 @@ func makeRootCmd() *cobra.Command {
 		Use: buildName,
 		Run: cmdRoot,
 	}
-	rootCmd.Flags().BoolVarP(&flagRootDryRun, "dry-run", "d", false, "dry run only")
+	rootCmd.PersistentFlags().BoolVarP(&flagRootVerbose, "verbose", "v", false, "verbose output (useful for debugging)")
+	rootCmd.PersistentFlags().BoolVarP(&flagRootDryRun, "dry-run", "d", false, "dry run only")
 	rootCmd.Flags().BoolVarP(&flagRootAllJobs, "all-jobs", "a", false, "execute all relevant backup jobs without asking")
 	rootCmd.Flags().StringVarP(&flagRootJobs, "jobs", "j", "", "execute a backup jobs by name")
 	rootCmd.Flags().StringVarP(&flagRootConfigDirs, "config-dirs", "c", "", "override default config dirs")
 	return rootCmd
 }
 
+func handleVerbosityFlag(isVerbose bool) {
+	if isVerbose {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		return
+	}
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+}
+
 func cmdRoot(cmd *cobra.Command, args []string) {
+	handleVerbosityFlag(flagRootVerbose)
 	print.Title("Check phase")
 
 	err := check()

@@ -20,6 +20,7 @@ func getMountCmd() *cobra.Command {
 }
 
 func cmdMount(cmd *cobra.Command, args []string) {
+	handleVerbosityFlag(flagRootVerbose)
 	if len(args) < 1 {
 		// TODO add selection dialog instead
 		log.Fatal().Msg("No target given")

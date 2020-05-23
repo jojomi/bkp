@@ -23,6 +23,7 @@ func getJobsCmd() *cobra.Command {
 }
 
 func cmdJobs(cmd *cobra.Command, args []string) {
+	handleVerbosityFlag(flagRootVerbose)
 	sourceDirs := SourceDirs()
 	jl := bkp.JobList{}
 	jl.Load(sourceDirs)
