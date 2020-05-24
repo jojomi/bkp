@@ -135,6 +135,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	fmt.Println()
 	print.Title("Execution phase")
 	for _, job := range selectedJobs {
+		log.Debug().Str("job", job.String()).Msg("Executing job")
 		err = job.Execute(bkp.JobExecuteOptions{
 			DryRun:        flagRootDryRun,
 			DoForget:      doForget,
@@ -150,9 +151,11 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	if doShutdown {
 		print.Title("Shutdown")
 		if !flagRootDryRun {
+			timeSpec := "+5"
+			log.Debug().Str("time specification", timeSpec).Msg("Shutdown scheduled")
 			sc := script.NewContext()
 			lc := script.NewLocalCommand()
-			lc.AddAll("shutdown", "--poweroff", "+5")
+			lc.AddAll("shutdown", "--poweroff", timeSpec)
 			sc.ExecuteDebug(lc)
 		}
 	}
