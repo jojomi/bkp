@@ -40,7 +40,7 @@ func (e *ResticExecutor) SetTarget(t *Target) {
 	if t.Password != "" {
 		e.context.SetEnv("RESTIC_PASSWORD", t.Password)
 	}
-	e.context.SetEnv("RESTIC_REPOSITORY", t.Path)
+	e.context.SetEnv("RESTIC_REPOSITORY", t.Type+":"+t.Path)
 }
 
 func (e *ResticExecutor) Command(command string, args ...string) (*script.ProcessResult, error) {
