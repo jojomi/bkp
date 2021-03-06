@@ -20,7 +20,7 @@ func ResticVersion() (semver.Version, error) {
 	sc := script.NewContext()
 	lc := script.LocalCommandFrom("restic version")
 	pr, err := sc.ExecuteFullySilent(lc)
-	rex := regexp.MustCompile(`[0-9+](\.[0-9+])?(\.[0-9+])`)
+	rex := regexp.MustCompile(`[0-9]+(\.[0-9]+)?(\.[0-9]+)`)
 	versionString := rex.FindString(pr.Output())
 	if err != nil {
 		v, _ := semver.Make("0.0.0")
