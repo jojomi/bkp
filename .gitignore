@@ -1,7 +1,7 @@
 # custom
 cmd/bkp/bkp
 .bkp
-vendor.orig
+vendor
 release.sh
 dist
 
