@@ -52,9 +52,14 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 	ex.SetCacheDir(j.CacheDir)
 	ex.DryRun = opts.DryRun
 
+	if opts.DoUnlock {
+		print.Boldln("restic unlock...")
+		ex.Command("unlock")
+		fmt.Println()
+	}
+
 	args := mergeStringSlices([]string{j.Source, "--verbose"}, j.Backup.Args)
 	ex.Command("backup", args...)
-	// TODO unlock if locked? ex.Command("unlock")
 
 	snapshotArgs := make([]string, 0)
 	if j.Hostname != "" {
@@ -140,6 +145,7 @@ func (j *Job) String() string {
 
 type JobExecuteOptions struct {
 	DryRun        bool
+	DoUnlock      bool
 	DoForget      bool
 	DoMaintenance bool
 }

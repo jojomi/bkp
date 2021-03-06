@@ -114,6 +114,12 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	print.Subtitle("Auto unlock")
+	doUnlock, err := interview.Confirm("Unlock repository if necessary?", true)
+	if err != nil {
+		log.Fatal().Err(err).Msg("No valid answer.")
+	}
+
 	print.Subtitle("Old Backups")
 	doForget, err := interview.Confirm("Delete older backups as specified after finishing the new backup?", true)
 	if err != nil {
@@ -138,6 +144,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		log.Debug().Str("job", job.String()).Msg("Executing job")
 		err = job.Execute(bkp.JobExecuteOptions{
 			DryRun:        flagRootDryRun,
+			DoUnlock:      doUnlock,
 			DoForget:      doForget,
 			DoMaintenance: doMaintenance,
 		})
