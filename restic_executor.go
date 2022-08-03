@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	script "github.com/jojomi/go-script/v2"
+	"github.com/jojomi/go-script/v2"
 	"github.com/rs/zerolog/log"
 )
 
