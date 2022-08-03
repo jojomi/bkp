@@ -14,20 +14,31 @@ func getMountCmd() *cobra.Command {
 	mountCmd := &cobra.Command{
 		Use:   "mount [target name]",
 		Short: "Mounts a target for restore",
-		Run:   cmdMount,
+		Run:   handleMount,
 	}
 	return mountCmd
 }
 
-func cmdMount(cmd *cobra.Command, args []string) {
-	handleVerbosityFlag(flagRootVerbose)
-	if len(args) < 1 {
+func handleMount(cmd *cobra.Command, args []string) {
+	env, err := ParseEnvMount(cmd, args)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not parse CLI env")
+	}
+	err = cmdMount(env)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not execute bkp")
+	}
+}
+
+func cmdMount(env EnvMount) error {
+	env.HandleVerbosity()
+	if len(env.Targets) < 1 {
 		// TODO add selection dialog instead
 		log.Fatal().Msg("No target given")
 	}
 
-	targetName := args[0]
-	target := bkp.TargetByName(targetName, SourceDirs())
+	targetName := env.Targets[0]
+	target := bkp.TargetByName(targetName, env.SourceDirs())
 
 	sc := script.NewContext()
 
@@ -35,11 +46,13 @@ func cmdMount(cmd *cobra.Command, args []string) {
 	re.SetTarget(target)
 	err := sc.EnsureDirExists(target.RestoreDir, os.FileMode(int(0750)))
 	if err != nil {
-		log.Fatal().Err(err).Msg("")
+		return err
 	}
 	print.Boldf("Mounting at %s\n", target.RestoreDir)
 	lc := script.NewLocalCommand()
 	lc.AddAll("xdg-open", target.RestoreDir)
 	sc.ExecuteSilent(lc)
 	re.Command("mount", target.RestoreDir)
+
+	return nil
 }

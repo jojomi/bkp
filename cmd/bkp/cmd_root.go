@@ -15,24 +15,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	flagRootVerbose    bool
-	flagRootDryRun     bool
-	flagRootAllJobs    bool
-	flagRootJobs       string
-	flagRootConfigDirs string
-)
-
 func makeRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use: buildName,
-		Run: cmdRoot,
+		Run: handleRoot,
 	}
-	rootCmd.PersistentFlags().BoolVarP(&flagRootVerbose, "verbose", "v", false, "verbose output (useful for debugging)")
-	rootCmd.PersistentFlags().BoolVarP(&flagRootDryRun, "dry-run", "d", false, "dry run only")
-	rootCmd.Flags().BoolVarP(&flagRootAllJobs, "all-jobs", "a", false, "execute all relevant backup jobs without asking")
-	rootCmd.Flags().StringVarP(&flagRootJobs, "jobs", "j", "", "execute a backup jobs by name")
-	rootCmd.Flags().StringVarP(&flagRootConfigDirs, "config-dirs", "c", "", "override default config dirs")
+
+	// persistent flags
+	pFlags := rootCmd.PersistentFlags()
+	pFlags.BoolP("verbose", "v", false, "more verbose output")
+	pFlags.BoolP("dry-run", "n", false, "dry run only")
+
+	// local flags
+	lFlags := rootCmd.Flags()
+	lFlags.BoolP("all-jobs", "a", false, "execute all relevant backup jobs without asking")
+	lFlags.StringArrayP("jobs", "j", []string{}, "execute backup jobs by name")
+	lFlags.StringArrayP("config-dirs", "c", []string{}, "override default config dirs")
+
 	return rootCmd
 }
 
@@ -44,8 +43,19 @@ func handleVerbosityFlag(isVerbose bool) {
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
 }
 
-func cmdRoot(cmd *cobra.Command, args []string) {
-	handleVerbosityFlag(flagRootVerbose)
+func handleRoot(cmd *cobra.Command, args []string) {
+	env, err := ParseEnvRoot(cmd, args)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not parse CLI env")
+	}
+	err = cmdRoot(env)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not execute bkp")
+	}
+}
+
+func cmdRoot(env EnvRoot) error {
+	env.HandleVerbosity()
 	print.Title("Check phase")
 
 	err := check()
@@ -53,7 +63,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		log.Fatal().Err(err).Msg("System check failed.")
 	}
 
-	sourceDirs := SourceDirs()
+	sourceDirs := env.SourceDirs()
 	jl := bkp.JobList{}
 	jl.Load(sourceDirs)
 
@@ -75,7 +85,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	fmt.Println()
 	print.Title("Preparation phase")
 
-	if flagRootJobs == "" {
+	if len(env.Jobs) == 0 {
 		selectionMap := make(map[string]*bkp.Job, len(relevantJobs))
 		options := make([]string, len(relevantJobs))
 		for i, job := range relevantJobs {
@@ -96,7 +106,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 		}
 	} else {
 		// job list given on CLI
-		jobNames := strings.Split(flagRootJobs, ",")
+		jobNames := env.Jobs
 		selections = make([]string, len(jobNames))
 		for i, jobName := range jobNames {
 			selections[i] = strings.TrimSpace(jobName)
@@ -143,7 +153,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	for _, job := range selectedJobs {
 		log.Debug().Str("job", job.String()).Msg("Executing job")
 		err = job.Execute(bkp.JobExecuteOptions{
-			DryRun:        flagRootDryRun,
+			DryRun:        env.DryRun,
 			DoUnlock:      doUnlock,
 			DoForget:      doForget,
 			DoMaintenance: doMaintenance,
@@ -157,7 +167,7 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 
 	if doShutdown {
 		print.Title("Shutdown")
-		if !flagRootDryRun {
+		if !env.DryRun {
 			timeSpec := "+5"
 			log.Debug().Str("time specification", timeSpec).Msg("Shutdown scheduled")
 			sc := script.NewContext()
@@ -170,6 +180,8 @@ func cmdRoot(cmd *cobra.Command, args []string) {
 	if !good {
 		os.Exit(1)
 	}
+
+	return nil
 }
 
 func check() error {

@@ -10,11 +10,10 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-func SourceDirs() []string {
-	if flagRootConfigDirs != "" {
-		paths := strings.Split(flagRootConfigDirs, ",")
-		result := make([]string, len(paths))
-		for i, path := range paths {
+func SourceDirs(input []string) []string {
+	if len(input) > 0 {
+		var result []string
+		for i, path := range input {
 			result[i] = strings.TrimSpace(path)
 		}
 		return result
