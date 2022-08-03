@@ -25,12 +25,17 @@ func makeRootCmd() *cobra.Command {
 	pFlags := rootCmd.PersistentFlags()
 	pFlags.BoolP("verbose", "v", false, "more verbose output")
 	pFlags.BoolP("dry-run", "n", false, "dry run only")
+	pFlags.StringArrayP("config-dirs", "c", []string{}, "override default config dirs")
 
 	// local flags
 	lFlags := rootCmd.Flags()
 	lFlags.BoolP("all-jobs", "a", false, "execute all relevant backup jobs without asking")
-	lFlags.StringArrayP("jobs", "j", []string{}, "execute backup jobs by name")
-	lFlags.StringArrayP("config-dirs", "c", []string{}, "override default config dirs")
+	lFlags.StringArrayP("job", "j", []string{}, "execute backup jobs by name")
+
+	lFlags.Bool("auto-unlock", false, "")
+	lFlags.Bool("forget", false, "")
+	lFlags.Bool("maintenance", false, "")
+	lFlags.Bool("shutdown", false, "")
 
 	return rootCmd
 }
@@ -113,39 +118,66 @@ func cmdRoot(env EnvRoot) error {
 		}
 
 		selectedJobs = make([]*bkp.Job, 0)
-	outside:
 		for _, selection := range selections {
+			foundRelevant := false
 			for _, relevantJob := range relevantJobs {
 				if relevantJob.Name == selection {
 					selectedJobs = append(selectedJobs, relevantJob)
-					break outside
+					foundRelevant = true
+					break
 				}
+			}
+			if !foundRelevant {
+				log.Warn().Msgf("Job %s not executed, because it was not found in relevant jobs", selection)
 			}
 		}
 	}
 
-	print.Subtitle("Auto unlock")
-	doUnlock, err := interview.Confirm("Unlock repository if necessary?", true)
-	if err != nil {
-		log.Fatal().Err(err).Msg("No valid answer.")
+	var (
+		doUnlock      bool
+		doForget      bool
+		doMaintenance bool
+		doShutdown    bool
+	)
+
+	if env.AutoUnlock != nil {
+		doUnlock = *env.AutoUnlock
+	} else {
+		print.Subtitle("Auto unlock")
+		doUnlock, err = interview.Confirm("Unlock repository if necessary?", true)
+		if err != nil {
+			log.Fatal().Err(err).Msg("No valid answer.")
+		}
 	}
 
-	print.Subtitle("Old Backups")
-	doForget, err := interview.Confirm("Delete older backups as specified after finishing the new backup?", true)
-	if err != nil {
-		log.Fatal().Err(err).Msg("No valid answer.")
+	if env.Forget != nil {
+		doForget = *env.Forget
+	} else {
+		print.Subtitle("Old Backups")
+		doForget, err = interview.Confirm("Delete older backups as specified after finishing the new backup?", true)
+		if err != nil {
+			log.Fatal().Err(err).Msg("No valid answer.")
+		}
 	}
 
-	print.Subtitle("Maintenance")
-	doMaintenance, err := interview.Confirm("Do maintenance operations (takes a lot of time)?", false)
-	if err != nil {
-		log.Fatal().Err(err).Msg("No valid answer.")
+	if env.Maintenance != nil {
+		doMaintenance = *env.Maintenance
+	} else {
+		print.Subtitle("Maintenance")
+		doMaintenance, err = interview.Confirm("Do maintenance operations (takes a lot of time)?", false)
+		if err != nil {
+			log.Fatal().Err(err).Msg("No valid answer.")
+		}
 	}
 
-	print.Subtitle("Shutdown")
-	doShutdown, err := interview.Confirm("Shutdown after finishing?", false)
-	if err != nil {
-		log.Fatal().Err(err).Msg("No valid answer.")
+	if env.Shutdown != nil {
+		doShutdown = *env.Shutdown
+	} else {
+		print.Subtitle("Shutdown")
+		doShutdown, err = interview.Confirm("Shutdown after finishing?", false)
+		if err != nil {
+			log.Fatal().Err(err).Msg("No valid answer.")
+		}
 	}
 
 	fmt.Println()
