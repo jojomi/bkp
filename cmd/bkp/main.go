@@ -32,5 +32,5 @@ func main() {
 }
 
 func init() {
-	minResticVersion, _ = semver.Make("0.9.5")
+	minResticVersion, _ = semver.Make("0.15.0")
 }
