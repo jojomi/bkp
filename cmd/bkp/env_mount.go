@@ -15,7 +15,10 @@ type EnvMount struct {
 func ParseEnvMount(cmd *cobra.Command, args []string) (EnvMount, error) {
 	env := EnvMount{}
 
-	env.Parse(cmd, args)
+	err := env.Parse(cmd, args)
+	if err != nil {
+		return EnvMount{}, err
+	}
 
 	env.Targets = args
 

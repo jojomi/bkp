@@ -19,7 +19,10 @@ func ParseEnvJobs(cmd *cobra.Command, args []string) (EnvJobs, error) {
 	)
 	env := EnvJobs{}
 
-	env.Parse(cmd, args)
+	err = env.Parse(cmd, args)
+	if err != nil {
+		return EnvJobs{}, err
+	}
 
 	env.RelevantOnly, err = f.GetBool("relevant")
 	if err != nil {

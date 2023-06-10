@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/jojomi/bkp"
-	script "github.com/jojomi/go-script/v2"
+	"github.com/jojomi/go-script/v2"
 	"github.com/jojomi/go-script/v2/interview"
 	"github.com/jojomi/go-script/v2/print"
 	"github.com/rs/zerolog"
@@ -205,7 +205,10 @@ func cmdRoot(env EnvRoot) error {
 			sc := script.NewContext()
 			lc := script.NewLocalCommand()
 			lc.AddAll("shutdown", "--poweroff", timeSpec)
-			sc.ExecuteDebug(lc)
+			_, err := sc.ExecuteDebug(lc)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -225,11 +228,13 @@ func check() error {
 	// warn about nice (Linux, MacOS X) and ionice (Linux)
 	sc := script.NewContext()
 	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+		fmt.Println("Checking for nice command...")
 		if !sc.CommandExists("nice") {
 			log.Warn().Msg("\"nice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
 		}
 	}
 	if runtime.GOOS == "linux" {
+		fmt.Println("Checking for ionice command...")
 		if !sc.CommandExists("ionice") {
 			log.Warn().Msg("\"ionice\" command not found. Please make sure it is in your PATH to keep your system responsive while doing backups.")
 		}

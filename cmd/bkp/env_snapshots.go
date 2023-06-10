@@ -16,7 +16,10 @@ type EnvSnapshots struct {
 func ParseEnvSnapshots(cmd *cobra.Command, args []string) (EnvSnapshots, error) {
 	env := EnvSnapshots{}
 
-	env.Parse(cmd, args)
+	err := env.Parse(cmd, args)
+	if err != nil {
+		return EnvSnapshots{}, err
+	}
 
 	if len(args) > 0 {
 		env.Targets = args[0:1]

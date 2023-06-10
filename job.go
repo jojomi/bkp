@@ -54,12 +54,18 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 
 	if opts.DoUnlock {
 		print.Boldln("restic unlock...")
-		ex.Command("unlock")
+		_, err := ex.Command("unlock")
+		if err != nil {
+			return err
+		}
 		fmt.Println()
 	}
 
 	args := mergeStringSlices([]string{j.Source, "--verbose"}, j.Backup.Args)
-	ex.Command("backup", args...)
+	_, err := ex.Command("backup", args...)
+	if err != nil {
+		return err
+	}
 
 	snapshotArgs := make([]string, 0)
 	if j.Hostname != "" {
@@ -68,7 +74,10 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 	if j.Source != "" {
 		snapshotArgs = append(snapshotArgs, "--path", strings.TrimRight(j.Source, `/`))
 	}
-	ex.Command("snapshots", snapshotArgs...)
+	_, err = ex.Command("snapshots", snapshotArgs...)
+	if err != nil {
+		return err
+	}
 
 	if opts.DoForget {
 		forgetArgs := []string{
@@ -95,24 +104,39 @@ func (j *Job) Execute(opts JobExecuteOptions) error {
 		if j.Forget.Keep.Yearly != nil {
 			forgetArgs = append(forgetArgs, "--keep-yearly", strconv.Itoa(*j.Forget.Keep.Yearly))
 		}
-		ex.Command("forget", forgetArgs...)
+		_, err := ex.Command("forget", forgetArgs...)
+		if err != nil {
+			return err
+		}
 	}
 
 	if opts.DoMaintenance {
 		print.Boldln("restic prune...")
-		ex.Command("prune")
+		_, err := ex.Command("prune")
+		if err != nil {
+			return err
+		}
 		fmt.Println()
 
 		print.Boldln("restic rebuild-index...")
-		ex.Command("rebuild-index")
+		_, err = ex.Command("rebuild-index")
+		if err != nil {
+			return err
+		}
 		fmt.Println()
 
 		print.Boldln("restic clean-cache...")
-		ex.Command("restic", "cache", "--cleanup")
+		_, err = ex.Command("restic", "cache", "--cleanup")
+		if err != nil {
+			return err
+		}
 		fmt.Println()
 
 		print.Boldln("restic check...")
-		ex.Command("check")
+		_, err = ex.Command("check")
+		if err != nil {
+			return err
+		}
 		fmt.Println()
 	}
 

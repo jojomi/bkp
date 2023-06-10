@@ -26,7 +26,10 @@ func ParseEnvRoot(cmd *cobra.Command, args []string) (EnvRoot, error) {
 		err error
 	)
 	env := EnvRoot{}
-	env.EnvGlobal.Parse(cmd, args)
+	err = env.EnvGlobal.Parse(cmd, args)
+	if err != nil {
+		return EnvRoot{}, err
+	}
 
 	env.AllJobs, err = f.GetBool("all-jobs")
 	if err != nil {

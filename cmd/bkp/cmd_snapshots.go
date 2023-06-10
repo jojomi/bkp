@@ -38,7 +38,10 @@ func cmdSnapshots(env EnvSnapshots) error {
 
 	re := bkp.NewResticExecutor()
 	re.SetTarget(target)
-	re.Command("snapshots", env.Args...)
+	_, err := re.Command("snapshots", env.Args...)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

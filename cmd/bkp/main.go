@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/blang/semver"
+	"github.com/jojomi/go-script/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -14,8 +15,9 @@ var (
 )
 
 func main() {
-	if forceRoot() {
-		os.Exit(0)
+	context := script.NewContext()
+	if !context.IsUserRoot() {
+		os.Exit(restartAsRoot())
 	}
 
 	log.Logger = log.With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
@@ -23,7 +25,10 @@ func main() {
 	// start handling commandline
 	rootCmd := makeRootCmd()
 	rootCmd.AddCommand(getEnvCmd(), getJobsCmd(), getSnapshotsCmd(), getMountCmd())
-	rootCmd.Execute()
+	err := rootCmd.Execute()
+	if err != nil {
+		log.Fatal().Err(err).Msg("execution failed")
+	}
 }
 
 func init() {

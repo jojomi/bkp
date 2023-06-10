@@ -44,15 +44,21 @@ func cmdMount(env EnvMount) error {
 
 	re := bkp.NewResticExecutor()
 	re.SetTarget(target)
-	err := sc.EnsureDirExists(target.RestoreDir, os.FileMode(int(0750)))
+	err := sc.EnsureDirExists(target.RestoreDir, os.FileMode(0750))
 	if err != nil {
 		return err
 	}
 	print.Boldf("Mounting at %s\n", target.RestoreDir)
 	lc := script.NewLocalCommand()
 	lc.AddAll("xdg-open", target.RestoreDir)
-	sc.ExecuteSilent(lc)
-	re.Command("mount", target.RestoreDir)
+	_, err = sc.ExecuteSilent(lc)
+	if err != nil {
+		return err
+	}
+	_, err = re.Command("mount", target.RestoreDir)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

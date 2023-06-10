@@ -17,7 +17,7 @@ func ResticUpdate() error {
 		return err
 	}
 
-	err = os.Chmod(sc.AbsPath(outPath), os.FileMode(int(0755)))
+	err = os.Chmod(sc.AbsPath(outPath), os.FileMode(0755))
 	if err != nil {
 		return err
 	}
@@ -27,12 +27,16 @@ func ResticUpdate() error {
 
 func DownloadFile(remote, local string) error {
 	out, err := os.Create(local)
-	defer out.Close()
+	defer func(out *os.File) {
+		_ = out.Close()
+	}(out)
 	if err != nil {
 		return err
 	}
 	resp, err := http.Get(remote)
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 	if err != nil {
 		return err
 	}

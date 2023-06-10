@@ -3,7 +3,6 @@ package bkp
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -60,7 +59,7 @@ func ScanTargetDir(path string) map[string]*Target {
 
 func ParseTargetFromJSONFile(filename string) (*Target, error) {
 	var target *Target
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +75,7 @@ func ParseTargetFromJSONFile(filename string) (*Target, error) {
 
 func ParseTargetFromYmlFile(filename string) (*Target, error) {
 	var target Target
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

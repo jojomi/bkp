@@ -19,7 +19,7 @@ func getEnvCmd() *cobra.Command {
 	return envCmd
 }
 
-func cmdEnv(cmd *cobra.Command, args []string) {
+func cmdEnv(_ *cobra.Command, _ []string) {
 	print.Boldln("# restic")
 	fmt.Print("restic ")
 	if bkp.ResticIsInstalled() {
