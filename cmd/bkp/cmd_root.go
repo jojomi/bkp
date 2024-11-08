@@ -59,7 +59,7 @@ func handleRoot(cmd *cobra.Command, args []string) {
 	}
 }
 
-func cmdRoot(env EnvRoot) error {
+func cmdRoot(env *EnvRoot) error {
 	env.HandleVerbosity()
 	print.Title("Check phase")
 
@@ -77,6 +77,7 @@ func cmdRoot(env EnvRoot) error {
 	)
 
 	relevantJobs := jl.Relevant()
+	log.Info().Int("count", len(relevantJobs)).Msg("number of relevant jobs")
 
 	if len(relevantJobs) == 0 {
 		log.Fatal().Msg("No relevant jobs found. Did you connect the backup targets?")

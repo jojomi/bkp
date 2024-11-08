@@ -33,4 +33,7 @@ func main() {
 
 func init() {
 	minResticVersion, _ = semver.Make("0.15.0")
+
+	// setup logging
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 }

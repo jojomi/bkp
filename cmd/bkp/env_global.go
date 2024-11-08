@@ -10,7 +10,7 @@ type EnvGlobal struct {
 	Verbose bool
 }
 
-func (x EnvGlobal) Parse(cmd *cobra.Command, _ []string) error {
+func (x *EnvGlobal) Parse(cmd *cobra.Command, _ []string) error {
 	var (
 		f   = cmd.Flags()
 		err error
@@ -29,10 +29,10 @@ func (x EnvGlobal) Parse(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func (x EnvGlobal) HandleVerbosity() {
+func (x *EnvGlobal) HandleVerbosity() {
 	handleVerbosityFlag(x.Verbose)
 }
 
-func (x EnvGlobal) SourceDirs() []string {
+func (x *EnvGlobal) SourceDirs() []string {
 	return SourceDirs(x.ConfigDirs)
 }

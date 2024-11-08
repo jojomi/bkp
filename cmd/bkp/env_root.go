@@ -20,15 +20,15 @@ type EnvRoot struct {
 	Verbose bool
 }
 
-func ParseEnvRoot(cmd *cobra.Command, args []string) (EnvRoot, error) {
+func ParseEnvRoot(cmd *cobra.Command, args []string) (*EnvRoot, error) {
 	var (
 		f   = cmd.Flags()
 		err error
 	)
-	env := EnvRoot{}
+	env := &EnvRoot{}
 	err = env.EnvGlobal.Parse(cmd, args)
 	if err != nil {
-		return EnvRoot{}, err
+		return env, err
 	}
 
 	env.AllJobs, err = f.GetBool("all-jobs")
